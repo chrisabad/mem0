@@ -12,12 +12,7 @@ This guide will help you deploy OpenMemory MCP to your Render account using Post
 
 ### 1. Deploy to Render
 
-From the root of your mem0 repository, run:
-
-```bash
-cd openmemory
-render create
-```
+From the root of your mem0 repository, deploy via the Render Dashboard (see instructions below)
 
 When prompted:
 - Select "Web Service" 
@@ -89,7 +84,7 @@ If you prefer to use Qdrant instead of pgvector:
 
 1. Sign up for [Qdrant Cloud](https://cloud.qdrant.io/)
 2. Create a cluster
-3. Update `render.yaml` to use the original Qdrant configuration
+3. Update the `render.yaml` in the repository root to use the original Qdrant configuration
 4. Set these environment variables in Render:
    - `QDRANT_HOST`: Your Qdrant cluster URL (without https://)
    - `QDRANT_API_KEY`: Your Qdrant API key

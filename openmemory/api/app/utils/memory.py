@@ -32,6 +32,7 @@ import json
 import hashlib
 import socket
 import platform
+import re
 
 from mem0 import Memory
 from app.database import SessionLocal
@@ -136,15 +137,60 @@ def reset_memory_client():
 
 def get_default_memory_config():
     """Get default memory client configuration with sensible defaults."""
-    return {
-        "vector_store": {
+    # Check if we should use pgvector (for Render deployment)
+    vector_store_provider = os.environ.get("VECTOR_STORE_PROVIDER", "qdrant")
+    
+    if vector_store_provider == "pgvector":
+        # Parse DATABASE_URL for pgvector configuration
+        database_url = os.environ.get("DATABASE_URL", "")
+        if database_url:
+            import re
+            match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', database_url)
+            if match:
+                user, password, host, port, dbname = match.groups()
+                vector_store_config = {
+                    "provider": "pgvector",
+                    "config": {
+                        "collection_name": "openmemory",
+                        "dbname": dbname,
+                        "user": user,
+                        "password": password,
+                        "host": host,
+                        "port": int(port),
+                        "embedding_model_dims": 1536
+                    }
+                }
+            else:
+                # Fallback to default pgvector config
+                vector_store_config = {
+                    "provider": "pgvector",
+                    "config": {
+                        "collection_name": "openmemory",
+                        "embedding_model_dims": 1536
+                    }
+                }
+        else:
+            # Fallback configuration
+            vector_store_config = {
+                "provider": "pgvector",
+                "config": {
+                    "collection_name": "openmemory",
+                    "embedding_model_dims": 1536
+                }
+            }
+    else:
+        # Default Qdrant configuration
+        vector_store_config = {
             "provider": "qdrant",
             "config": {
                 "collection_name": "openmemory",
                 "host": "mem0_store",
                 "port": 6333,
             }
-        },
+        }
+    
+    return {
+        "vector_store": vector_store_config,
         "llm": {
             "provider": "openai",
             "config": {

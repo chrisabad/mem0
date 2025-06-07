@@ -7,11 +7,12 @@ WORKDIR /usr/src/openmemory
 # Install PostgreSQL client for pgvector setup
 RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Copy requirements and install dependencies
+COPY openmemory/api/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY config.json .
-COPY . .
+# Copy the API code
+COPY openmemory/api/ .
 
 # Make startup script executable
 RUN chmod +x startup_render.sh
